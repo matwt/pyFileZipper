@@ -75,6 +75,9 @@ def getFilesInCurrentDirectory():
     onlyfiles = [f for f in listdir('.') if isfile(f)]
     return onlyfiles
 
+def getDirsInDirectory(path):
+    onlydirs = [d for d in listdir(path) if os.path.isdir(join(path, d))]
+    return onlydirs
 
 # function that takes a lits of files and returns a list of only the files with a .csv extention
 def getcsvFiles(files:list) -> list:
@@ -95,6 +98,15 @@ def getzipFiles(files:list) -> list:
             zipList.append(item)
     return zipList
 
+# function that takes a lits of files/dirs and returns a list of only the folders
+def getFolders(files:list) -> list:
+    global folder_path
+    foldList = []
+    for item in files:
+        d = os.path.join(folder_path, item)
+        if os.path.isdir(d):
+            foldList.append(item)
+    return foldList
 
 def zipFilesInFolder(files, threadNo):
     global folder_path
@@ -225,6 +237,17 @@ def unzipFilesInFolder():
     messagebox.showinfo(title="Un-Zipping info", message="Unzipping finnished in: " + str(totalTime))
 
 
+def unzipFoldersInFolder():
+    global folder_path
+    global root
+    folders = getDirsInDirectory(str(folder_path + '/'))
+    #folders = getFolders(files)
+
+    folder_path_temp = folder_path
+    for folder_path_local in folders:
+        folder_path = folder_path_temp + '/' + folder_path_local
+        unzipFilesInFolder()
+    folder_path = folder_path_temp
 
 
 def wait(message):
@@ -261,6 +284,7 @@ def main():
     global folderLabel
     global buttonZip
     global buttonUnZip
+    global buttonUnZipFold
     global root
 
     root = tk.Tk()
@@ -292,6 +316,7 @@ def main():
     buttonBrowse = Button(root, text='Choose folder', command=browse_button)
     # buttonBrowse.place(x=100, y=150)
     buttonZip = Button(root, text="Zip files in folder", command=zipFilesCommand, state=DISABLED)
+    buttonUnZipFold = Button(root, text="Un-Zip folders and files in folder", command=unzipFoldersInFolder, state=DISABLED)
     buttonUnZip = Button(root, text="Un-Zip files in folder", command=unzipFilesInFolder, state=DISABLED)
     # buttonZip.place(x=20, y=20)
 
@@ -303,6 +328,7 @@ def main():
     # buttonZip.pack()
     buttonZip.place(relx=0.3, rely=0.7, anchor=CENTER)
     buttonUnZip.place(relx=0.7, rely=0.7, anchor=CENTER)
+    buttonUnZipFold.place(relx=0.5, rely=0.9, anchor=CENTER)
     # title.pack()
     root.mainloop()
 
@@ -329,7 +355,7 @@ def browse_button():
         folderLabel.config(text=folder_path)
         buttonZip.config(state=ACTIVE)
         buttonUnZip.config(state=ACTIVE)
-
+        buttonUnZipFold.config(state=ACTIVE)
     
     # folder_path.set(filename)
     print(filename)
